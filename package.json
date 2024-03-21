@@ -6,7 +6,9 @@
     "start": "func start",
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  },
   "devDependencies": {
     "azure-functions-core-tools": "^4.x"
   }
