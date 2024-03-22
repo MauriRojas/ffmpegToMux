@@ -49,26 +49,28 @@ const streamToMux = (filePath, context) => {
     });
 };
 
-const downloadFromMuxToFileSystem = async (url, filePath, context) => {
+const downloadFromMuxToFileSystem = async (url, filePath) => {
     const writer = fs.createWriteStream(filePath);
-    
-    context.log("Downloading asset from Mux");
 
-    const response = await axios({
+    return axios({
         method: 'GET',
         url: url,
         responseType: 'stream'
-    });
-
-    context.log("Writing asset to file system");
-
-    await response.data.pipe(writer);
-
-    context.log("Saved on file system");
-
-    return new Promise((resolve, reject) => {
-        writer.on('finish', resolve);
-        writer.on('error', reject);
+    }).then(response => {
+        return new Promise((resolve, reject) => {
+            response.data.pipe(writer);
+            let error = null;
+            writer.on('error', err => {
+                error = err;
+                writer.close();
+                reject(err);
+            });
+            writer.on('close', () => {
+                if (!error) {
+                    resolve(true);
+                }
+            });
+        });
     });
 }
 
@@ -83,6 +85,8 @@ module.exports = async function (context, myQueueItem) {
     const outputDir = path.join(tempDir, `downloaded_file`);
     fs.mkdirSync(outputDir, { recursive: true });
     const filePath = path.join(outputDir, 'downloaded_file.mp4')
+
+    context.log("Downloading asset from Mux");
 
     await downloadFromMuxToFileSystem(url, filePath, context)
     .then(() => {
