@@ -62,7 +62,7 @@ const downloadFromMuxToFileSystem = async (url, filePath, context) => {
 
     context.log("Writing asset to file system");
 
-    response.data.pipe(writer);
+    await response.data.pipe(writer);
 
     context.log("Saved on file system");
 
