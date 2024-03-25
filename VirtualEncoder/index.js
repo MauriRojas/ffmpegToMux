@@ -75,18 +75,18 @@ const downloadFromMuxToFileSystem = async (url, filePath) => {
 }
 
 module.exports = async function (context, myQueueItem) {
-    context.log('JavaScript queue trigger function processing work item', myQueueItem);
+    context.log('JavaScript queue trigger function processing work item ', myQueueItem);
 
     // 2. Process the message here
     context.log('Starting streaming blob');
 
-    const url = "https://master.mux.com/qENtrEqJz7SSsoTGkp6O9NMNyR6u2YMz/master.mp4?skid=default&signature=NjVmZjFjZDZfNWVlM2JiYzcyYjRhZmJkY2U5NWEwODU5YzViZjI5MzhiNTUxOGY3NGU1ZjVkNTQxZTJiNTFkN2U2NjlhNGI2OA==";
+    const url = myQueueItem;
     const tempDir = os.tmpdir();
     const outputDir = path.join(tempDir, `downloaded_file`);
     fs.mkdirSync(outputDir, { recursive: true });
     const filePath = path.join(outputDir, 'downloaded_file.mp4')
 
-    context.log("Downloading asset from Mux");
+    context.log("Downloading asset from Mux to " + filePath);
 
     await downloadFromMuxToFileSystem(url, filePath, context)
     .then(() => {
