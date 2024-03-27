@@ -1,17 +1,21 @@
 const childProcess = require('child_process');
-const { resolve } = require('path');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const path = require("path");
 
-const streamToMux = (context, blobSasUrl) => {
+const streamToMux = (context, message) => {
     return new Promise(async (resolve, reject) => {
         context.log(`Running ffmpeg from ${ffmpegPath}`);
+
+        context.log(`Asset source is ${message.assetPath}`);
+
+        var currentTime = new Date().getTime();
+
+        var startOffset = Math.floor((currentTime - message.classStartTime) / 1000);
 
         // ffmpeg -i myfile_1.mp4 -f flv rtmp://global-live.mux.com:5222/app/{my_stream_key}
         const child = childProcess.spawn(
             ffmpegPath,
             // note, args must be an array when using spawn
-            ['-i', `${blobSasUrl}`, '-f', 'flv', 'rtmp://global-live.mux.com:5222/app/5ac28812-8320-0c76-2ba2-313288af035f'],
+            ['-ss', `${startOffset}`, '-i', `${message.assetPath}`, '-f', 'flv', 'rtmp://global-live.mux.com:5222/app/5ac28812-8320-0c76-2ba2-313288af035f'],
             {
                 windowsVerbatimArguments: true,
             }
@@ -44,14 +48,14 @@ const streamToMux = (context, blobSasUrl) => {
     });
 };
 
-module.exports = async function (context, blobSasUrl) {
-    context.log('JavaScript queue trigger function processing work item', blobSasUrl);
+module.exports = async function (context, queueMessage) {
+    context.log('JavaScript queue trigger function processing work item', queueMessage);
 
     // 2. Process the message here
-    context.log('Starting streaming blob');
+    context.log('Starting streaming asset');
 
     try {
-        var finished = await streamToMux(context, blobSasUrl);
+        var finished = await streamToMux(context, queueMessage);
     } catch (error) {
         context.log("Error while streaming to Mux " + error);
     }
