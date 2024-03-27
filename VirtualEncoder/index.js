@@ -7,7 +7,7 @@ const streamToMux = (context, blobSasUrl) => {
     return new Promise(async (resolve, reject) => {
         context.log(`Running ffmpeg from ${ffmpegPath}`);
 
-        // ffmpeg -re -i myfile_1.mp4 -r 30 -c:v libx264 -x264-params keyint=60:scenecut=0 -preset fast -b:v 5M -maxrate 6M -bufsize 3M -threads 4 -f flv rtmp://global-live.mux.com:5222/app/{my_stream_key}
+        // ffmpeg -i myfile_1.mp4 -f flv rtmp://global-live.mux.com:5222/app/{my_stream_key}
         const child = childProcess.spawn(
             ffmpegPath,
             // note, args must be an array when using spawn
@@ -38,7 +38,6 @@ const streamToMux = (context, blobSasUrl) => {
                 resolve('Streamed successfully')
             } else {
                 context.log(`FFmpeg encountered an error, check the console output`);
-                console.log(child);
                 reject(`FFmpeg encountered an error, check the console output`);
             }
         });
@@ -51,7 +50,11 @@ module.exports = async function (context, blobSasUrl) {
     // 2. Process the message here
     context.log('Starting streaming blob');
 
-    var finished = await streamToMux(context, blobSasUrl);
+    try {
+        var finished = await streamToMux(context, blobSasUrl);
+    } catch (error) {
+        context.log("Error while streaming to Mux " + error);
+    }
 
     context.log("Finished execution", finished);
 };
