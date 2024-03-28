@@ -1,21 +1,35 @@
 const childProcess = require('child_process');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
-const streamToMux = (context, message) => {
+const streamToMux = (context, queueMessage) => {
     return new Promise(async (resolve, reject) => {
         context.log(`Running ffmpeg from ${ffmpegPath}`);
 
-        context.log(`Asset source is ${message.assetPath}`);
+        context.log(`Asset source is ${queueMessage.assetPath}`);
 
         var currentTime = new Date().getTime();
 
-        var startOffset = Math.floor((currentTime - message.classStartTime) / 1000);
+        var startOffset = Math.floor((currentTime - queueMessage.classStartTime) / 1000);
+
+        if (startOffset <= 0 && queueMessage.force === false){
+            context.log('Class start time is in the future, aborting execution');
+            return true;
+        }
+
+        if (queueMessage.classEndTime < currentTime && queueMessage.force === false){
+            context.log('Class already finished, aborting execution');
+            return true;
+        }
+
+        if (queueMessage.force === true){
+            startOffset = 0;
+        }
 
         // ffmpeg -i myfile_1.mp4 -f flv rtmp://global-live.mux.com:5222/app/{my_stream_key}
         const child = childProcess.spawn(
             ffmpegPath,
             // note, args must be an array when using spawn
-            ['-ss', `${startOffset}`, '-i', `${message.assetPath}`, '-f', 'flv', 'rtmp://global-live.mux.com:5222/app/5ac28812-8320-0c76-2ba2-313288af035f'],
+            ['-ss', `${startOffset}`, '-i', `${queueMessage.assetPath}`, '-f', 'flv', 'rtmp://global-live.mux.com:5222/app/5ac28812-8320-0c76-2ba2-313288af035f'],
             {
                 windowsVerbatimArguments: true,
             }
