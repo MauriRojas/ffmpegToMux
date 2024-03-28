@@ -30,12 +30,12 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }} 
-          registryUrl: voddev.azurecr.io
+          registryUrl: quickstartmr.azurecr.io
           registryUsername: ${{ secrets.MYAPP_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.MYAPP_REGISTRY_PASSWORD }}
-          containerAppName: vod-dev
-          resourceGroup: vod-rg
-          imageToBuild: voddev.azurecr.io/vod-dev:${{ github.sha }}
+          containerAppName: my-app
+          resourceGroup: jobs-quickstart
+          imageToBuild: quickstartmr.azurecr.io/vod-dev:${{ github.sha }}
           
             
 
