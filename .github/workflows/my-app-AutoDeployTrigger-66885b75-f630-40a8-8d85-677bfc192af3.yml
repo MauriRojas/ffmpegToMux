@@ -35,7 +35,7 @@ jobs:
           registryPassword: ${{ secrets.MYAPP_REGISTRY_PASSWORD }}
           containerAppName: my-app
           resourceGroup: jobs-quickstart
-          imageToBuild: quickstartmr.azurecr.io/my-app:${{ github.sha }}
+          imageToBuild: quickstartmr.azurecr.io/vod-dev:${{ github.sha }}
           
             
 
