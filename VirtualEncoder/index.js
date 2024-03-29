@@ -40,7 +40,7 @@ const streamToMux = (context, queueMessage) => {
         });
 
         child.stderr.on('data', (data) => {
-            context.log.error(`stderr: ${data}`);
+            context.log(`stderr: ${data}`);
         });
 
         child.on('error', (error) => {
@@ -72,6 +72,7 @@ module.exports = async function (context, queueMessage) {
     context.log('Starting streaming asset');
 
     try {
+        //var deserializedQueueMessage = JSON.parse(queueMessage);
         var finished = await streamToMux(context, queueMessage);
     } catch (error) {
         context.log.error("Error while streaming to Mux " + error);
