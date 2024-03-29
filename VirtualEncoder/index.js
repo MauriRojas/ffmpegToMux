@@ -22,12 +22,12 @@ const streamToMux = (context, blobSasUrl) => {
         });
 
         child.stderr.on('data', (data) => {
-            context.log(`stderr: ${data}`);
+            context.log.error(`stderr: ${data}`);
         });
 
         child.on('error', (error) => {
             // catches execution error (bad file)
-            context.log(`Error executing binary: ${ffmpegPath}`);
+            context.error.log(`Error executing binary: ${ffmpegPath}`);
             reject(error);
         });
 
@@ -37,7 +37,7 @@ const streamToMux = (context, blobSasUrl) => {
                 context.log("Finished gracefully");
                 resolve('Streamed successfully')
             } else {
-                context.log(`FFmpeg encountered an error, check the console output`);
+                context.log.error(`FFmpeg encountered an error, check the console output`);
                 reject(`FFmpeg encountered an error, check the console output`);
             }
         });
@@ -45,15 +45,20 @@ const streamToMux = (context, blobSasUrl) => {
 };
 
 module.exports = async function (context, blobSasUrl) {
+    let appInsights = require("applicationinsights");
+    appInsights.setup().start();
+
     context.log('JavaScript queue trigger function processing work item', blobSasUrl);
 
     // 2. Process the message here
     context.log('Starting streaming blob');
 
-    try {
+    try 
+    {
         var finished = await streamToMux(context, blobSasUrl);
     } catch (error) {
-        context.log("Error while streaming to Mux " + error);
+        context.log.error("Error while streaming to Mux " + error);
+        throw error;
     }
 
     context.log("Finished execution", finished);
